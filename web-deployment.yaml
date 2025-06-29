@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  namespace: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: employees
+  template:
+    metadata:
+      labels:
+        app: employees
+    spec:
+      containers:
+        - name: web
+          image: 058264150152.dkr.ecr.us-east-1.amazonaws.com/webapp:v2
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DBHOST
+              value: mysql-service.mysql.svc.cluster.local
+            - name: DBPORT
+              value: "3306"
+            - name: DBUSER
+              value: root
+            - name: DBPWD
+              value: rootpass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  namespace: web
+spec:
+  selector:
+    app: employees
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30000
+  type: NodePort
+
